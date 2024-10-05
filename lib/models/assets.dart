@@ -5,15 +5,19 @@ class Asset {
   final String symbol;
   final num boughtPrice;
   final int quantity;
+  final num profit;
 
   Asset({
     required this.name,
     required this.symbol,
     required this.boughtPrice,
     required this.quantity,
+    this.profit = 0
   });
 
   static List<Asset> decode(List<dynamic> stuff) => stuff.map<Asset>((item) => Asset.fromJson(item)).toList();
+
+  static List<Asset> decodePL(List<dynamic> stuff) => stuff.map<Asset>((item) => Asset.fromPLJson(item)).toList();
 
   static List<Asset> decodeTopThree(List<dynamic> stuff) => stuff.map<Asset>((item) => Asset.fromTopThreeJson(item)).toList();
 
@@ -26,6 +30,16 @@ class Asset {
       symbol: json['symbol'],
       boughtPrice: json['bought_price'],
       quantity: json['quantity'],
+    );
+  }
+
+  static fromPLJson(Map<String, dynamic> json) {
+    return Asset(
+      name: json['asset_name'],
+      profit:json ['profit_loss'],
+      symbol: '',
+      boughtPrice: 0 ,
+      quantity: 0,
     );
   }
 

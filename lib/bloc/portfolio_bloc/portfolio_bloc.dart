@@ -55,10 +55,12 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
 
   void _mapGetAllTransactions(GetAllTransactions event, Emitter<PortfolioState> emit) async {
     try {
-      emit(state.copyWith(status: PortfolioStatus.loading));
+      emit(state.copyWith(status: PortfolioStatus.tranLoading));
       final items = await repository.getAllTransaction();
-      emit(state.copyWith(transactions: items, status: PortfolioStatus.success));
+      emit(state.copyWith(transactions: items, status: PortfolioStatus.tranLoaded));
+      emit(state.copyWith(status: PortfolioStatus.success));
     } catch (error) {
+      print(error);
       emit(state.copyWith(status: PortfolioStatus.error));
     }
   }

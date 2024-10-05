@@ -1,14 +1,14 @@
 part of 'portfolio_bloc.dart';
 
-enum PortfolioStatus { initial, success, error, loading, cardLoading, cardLoaded }
+enum PortfolioStatus { initial, success, error, loading, tranLoading, tranLoaded }
 
 extension WatchListStatusX on PortfolioStatus {
   bool get isInitial => this == PortfolioStatus.initial;
   bool get isSuccess => this == PortfolioStatus.success;
   bool get isError => this == PortfolioStatus.error;
   bool get isLoading => this == PortfolioStatus.loading;
-  // bool get isDetailsLoading => this == WatchListStatus.cardLoading;
-  // bool get isDetailsLoaded => this == WatchListStatus.cardLoaded;
+  bool get isTransactionLoading => this == PortfolioStatus.tranLoaded;
+  bool get isTransactionLoaded => this == PortfolioStatus.tranLoaded;
 
 // bool get isDataChange => this == FoodCartStatus.dataChange;
   // bool get isMerchantChange => this == FoodCartStatus.merchantChange;

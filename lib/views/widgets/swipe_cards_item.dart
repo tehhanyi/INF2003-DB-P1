@@ -7,6 +7,7 @@ import 'package:swipe_cards/swipe_cards.dart';
 import 'package:varsity_app/api/local_service.dart';
 import 'package:varsity_app/bloc/cards_bloc/card_bloc.dart';
 
+import '../../models/assets.dart';
 import '../../models/stocks.dart';
 
 class SwipeCardItem extends StatefulWidget {
@@ -57,7 +58,6 @@ class _SwipeCardItemState extends State<SwipeCardItem> {
                                   fontSize: 16.sp,
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold)),
-                              Text('\$${marketInfo.openPrice}'),
                               SizedBox(height: 5.sp),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -87,10 +87,10 @@ class _SwipeCardItemState extends State<SwipeCardItem> {
                               ),
                               Text('\$${(qty * num.parse(marketInfo.openPrice)).toStringAsFixed(2)}',
                                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.blueGrey)),
-                              TextButton(onPressed: () {
-
-                                
+                              TextButton(onPressed: () async {
+                                await LocalService().createTransaction(Asset(name: stock.name!, symbol: stock.symbol, boughtPrice: num.parse(marketInfo.openPrice), quantity: qty));
                                 controller.play();
+                                Navigator.of(dContext).pop();
                                 Future.delayed(Duration(seconds: 1)).then((value) => controller.stop());
                               },
                                   child: Text('Buy Paper Asset',

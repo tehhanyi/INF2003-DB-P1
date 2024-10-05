@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
+import 'package:varsity_app/bloc/pl_bloc/pl_bloc.dart';
 import 'package:varsity_app/bloc/portfolio_bloc/portfolio_bloc.dart';
 
 import '../models/assets.dart';
@@ -19,6 +20,8 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
   void initState() {
     BlocProvider.of<PortfolioBloc>(context).add(GetName());// allStocks();
     BlocProvider.of<PortfolioBloc>(context).add(GetAllTransactions());
+    // BlocProvider.of<PLBloc>(context).add(GetProfitLoss(PortfolioBloc));
+
     super.initState();
   }
 
@@ -92,6 +95,70 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
             ]
         ));
   }
+  Widget User(){
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 5.w),
+      child: Column(
+        children: [
+          Image.asset('assets/images/user.png', height: 12.h, fit: BoxFit.fitHeight, color: Colors.white,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Hi, ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp)),
+              BlocBuilder<PortfolioBloc, PortfolioState>(builder: (context, state){
+                return Text('${state.name}!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp));
+              }),
+              // Text('$name!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp)),
+              IconButton(onPressed: (){
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text('Edit Name?'),
+                          content: TextField(
+                              controller: nameController,
+                              maxLines: 1,
+                              maxLength: 30,
+                              decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.black54,
+                                  hoverColor: Colors.white,
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0)),
+                                  hintText: 'Name')),//Text(''),
+                          actions: [
+                            TextButton(onPressed: () {
+                              nameController.clear();
+                              Navigator.of(context).pop();
+                            }, child: Text('No', style: TextStyle(color: Colors.grey))),
+                            TextButton(onPressed: (){
+                              BlocProvider.of<PortfolioBloc>(context).add(UpdateName(nameController.text));
+                              nameController.clear();
+                              Navigator.of(context).pop();
+                            }, child: Text('Yes'),)
+                          ]);
+                    });
+              }, icon: Icon(Icons.edit))
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  Widget PL(){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text('Profit / Loss'),
+        BlocBuilder<PLBloc, PLState>(builder: (context, state){
+          if(state.status.isSuccess)
+            return Text('${(state.price > 0) ? '+' : '-'}\$${state.price.toString().replaceAll(RegExp('-'), '')}',
+              style: TextStyle(fontWeight: FontWeight.bold, color: (state.price > 0) ? Colors.green : Colors.red, fontSize: 24.sp));
+          else return const Center(child: CircularProgressIndicator());
+
+        })
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +184,7 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
                             }, child: Text('Yes', style: TextStyle(color: Colors.red),),)
                         ]);
                   });
-            }, icon: Icon(Icons.delete))
+            }, icon: Icon(Icons.delete, color: Colors.red[900],))
             // Image.asset('assets/images/logo.png', height: 12.h, fit: BoxFit.fitHeight),
           ]),
           automaticallyImplyLeading: false,
@@ -125,48 +192,10 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
         //
         body: Column(
           children: [
-            Image.asset('assets/images/user.png', height: 12.h, fit: BoxFit.fitHeight, color: Colors.white,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Hi, ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp)),
-                BlocBuilder<PortfolioBloc, PortfolioState>(builder: (context, state){
-                    return Text('${state.name}!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp));
-                }),
-                // Text('$name!', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp)),
-                IconButton(onPressed: (){
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                            title: Text('Edit Name?'),
-                            content: TextField(
-                                controller: nameController,
-                                maxLines: 1,
-                                maxLength: 30,
-                                decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.black54,
-                                    hoverColor: Colors.white,
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0)),
-                                    hintText: 'Name')),//Text(''),
-                            actions: [
-                              TextButton(onPressed: () {
-                                nameController.clear();
-                                Navigator.of(context).pop();
-                              }, child: Text('No', style: TextStyle(color: Colors.grey))),
-                              TextButton(onPressed: (){
-                                BlocProvider.of<PortfolioBloc>(context).add(UpdateName(nameController.text));
-                                nameController.clear();
-                                Navigator.of(context).pop();
-                              }, child: Text('Yes'),)
-                            ]);
-                      });
-                }, icon: Icon(Icons.edit))
-              ],
-            ),
-
-            // Center(child: Donut()),
+            Row(children:[
+              Expanded(flex: 5, child: User()),
+              Flexible(flex: 4, child: PL())
+            ]),
             Padding(
               padding: EdgeInsets.symmetric( horizontal: 5.w),
               child: Row(
@@ -178,21 +207,29 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
               ),
             ),
             BlocBuilder<PortfolioBloc, PortfolioState>(builder: (context, state) {
-              // List<UserOrder> orders = state.orders.where((order) => order.status == widget.status).toList();
-        if (state.status.isSuccess) {
-          return Container(
-            height: 60.h,
-            child: ListView(children: _renderTransactionItems(state.transactions)),
-          );
-        }
-        else{
-          return Container();
-        }
-      })
+              if (state.status.isSuccess || state.status.isTransactionLoaded) {
+                return Container(
+                  height: 60.h,
+                  child: ListView(children: _renderTransactionItems(state.transactions)),
+                );
+              }
+              else if(state.status.isLoading || state.status.isTransactionLoading){
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                // return RefreshIndicator(
+                    // onRefresh: {{_pullRefresh,
+                    // child:
+                    return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                            child: Text('There seem to be an error, please try again.',),
+                            height: 60.h));
+              }
+            })
             // Asset('Apple Inc.', 3 , '\$172.28 USD', [172.28, 176.04, 171.03, 172.28]),
             // Asset('BlackRock Inc', 1 , '\$824.83 USD', [804.68, 834.79, 834.47,824.83]),
             // Asset('Nestle (Malaysia) Berhad', 1 , '117.90 MYR',[119.30, 117.90, 118.00, 117.90]),
           ],
-        ));
+    ));
   }
 }
