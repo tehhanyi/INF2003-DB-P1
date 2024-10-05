@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'package:varsity_app/bloc/pl_bloc/pl_bloc.dart';
 import 'package:varsity_app/bloc/portfolio_bloc/portfolio_bloc.dart';
 import 'package:varsity_app/views/splash.dart';
 
@@ -36,7 +37,8 @@ class _AppState extends State<MyApp> {
           BlocProvider<PortfolioBloc>(
               create: (context) => PortfolioBloc(repository: _localRepository,)
                 ..add(GetName())
-          )
+          ),BlocProvider<PLBloc>(
+              create: (context) => PLBloc(repository: _localRepository, transactionBloc: context.read<PortfolioBloc>()))
           ],
         child: Sizer(builder: (context, orientation, deviceType) {
       return  Builder(builder: (context) {

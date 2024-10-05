@@ -132,18 +132,37 @@ class LocalService {
     return true;
   }
 
-  Future<String> getProfitLoss(List<Asset> stocks) async{
-    for (var stock in stocks){
+  Future<num> getProfitLoss(List<Asset> assets) async{
+    assets = assets.toSet().toList();
+    for (var stock in assets){
       var realTimeStock = await getMarketInfo(stock.symbol);
       if (realTimeStock != null)
         await ApiSB().dio.patch('/Asset?symbol=eq.${stock.symbol}',
             data: jsonEncode({'current_price': realTimeStock.openPrice}));
+      print('updated ${stock.symbol}');
     }
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
     var response = await ApiSB().dio.post('/rpc/get_user_profit_loss', data: jsonEncode({'p_user_id': userId}));
-    String profitLoss = response.data[0]['profit_loss'].toString();
-    return profitLoss;
+    List<Asset> list = [];
+    // String profitLoss = response.data[0]['profit_loss'].toString();
+
+    if (response != ''){
+      print('getProfitLoss $response');
+      try{
+        // print(response.runtimeType);
+        list = Asset.decodePL(response.data);
+      }catch(e){
+        print('error $e');
+      }
+    }
+    num totalPL = 0;
+    for (var asset in list){
+      totalPL += asset.profit;
+    }
+    return (totalPL * 100).truncateToDouble() / 100;
+
+
   }
 
   Future<List<Asset>> getTopThree() async{

@@ -22,6 +22,8 @@ class LocalRepository {
 
   Future<List<Asset>> getAllTransaction() => service.getAllTransaction();
 
+  Future<num> getProfitLoss(List<Asset> assets) => service.getProfitLoss(assets);
+
 // Future<bool> addWatchlist(Stocks stock) => service.addWatchlist(stock);
   //
   // Future<bool> updateWatchlist(List<Stocks> stock) => service.updateWatchlist(stock);
