@@ -20,41 +20,37 @@ class UpdateName extends PortfolioEvent{
 
 class DeleteUser extends PortfolioEvent{
 
-  const DeleteUser();
-
   @override
   List<Object?> get props => [];
 }
 
 class GetAllTransactions extends PortfolioEvent {
-  @override
-  List<Object?> get props => [];
-}
-
-class AddWatchList extends PortfolioEvent {
-  final Stocks item;
-
-  const AddWatchList(this.item);
 
   @override
   List<Object?> get props => [];
 }
 
-class RemoveWatchList extends PortfolioEvent {
-  final Stocks item;
-
-  const RemoveWatchList(this.item);
+class GetLeaderboard extends PortfolioEvent {
 
   @override
   List<Object?> get props => [];
 }
-
-
-// class GetMoreInfo extends WatchListEvent {
-//   // final Stocks currentItem;
+// class AddWatchList extends PortfolioEvent {
+//   final Stocks item;
 //
-//   // const GetMoreInfo(this.currentItem);
+//   const AddWatchList(this.item);
 //
 //   @override
 //   List<Object?> get props => [];
 // }
+//
+// class RemoveWatchList extends PortfolioEvent {
+//   final Stocks item;
+//
+//   const RemoveWatchList(this.item);
+//
+//   @override
+//   List<Object?> get props => [];
+// }
+
+

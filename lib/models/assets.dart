@@ -19,7 +19,7 @@ class Asset {
 
   static List<Asset> decodePL(List<dynamic> stuff) => stuff.map<Asset>((item) => Asset.fromPLJson(item)).toList();
 
-  static List<Asset> decodeTopThree(List<dynamic> stuff) => stuff.map<Asset>((item) => Asset.fromTopThreeJson(item)).toList();
+  static List<Asset> decodeTopTen(List<dynamic> stuff) => stuff.map<Asset>((item) => Asset.fromTopTenJson(item)).toList();
 
   static String encode(List<Asset> stuff) =>
       json.encode(stuff.map<Map<String, dynamic>>((stuff) => Asset.toJson(stuff)).toList());
@@ -43,7 +43,7 @@ class Asset {
     );
   }
 
-  static fromTopThreeJson(Map<String, dynamic> json) {
+  static fromTopTenJson(Map<String, dynamic> json) {
     return Asset(
       name: json['asset_name'],
       symbol: json['symbol'],

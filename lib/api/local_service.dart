@@ -127,8 +127,12 @@ class LocalService {
       "bought_price": asset.boughtPrice,
       "quantity": asset.quantity
     });
-    var response = await ApiSB().dio.post('/rpc/add_transaction_with_asset', data: data);
-    print('createTransaction \n$response');
+    try{
+      var response = await ApiSB().dio.post('/rpc/add_transaction_with_asset', data: data);
+      print('createTransaction $response');
+      } catch(e){
+        print('error $e');
+      }
     return true;
   }
 
@@ -162,12 +166,12 @@ class LocalService {
 
   }
 
-  Future<List<Asset>> getTopThree() async{
-    var response = await ApiSB().dio.post('/rpc/get_top_3_assets_by_quantity');
+  Future<List<Asset>> getTopTen() async{
+    var response = await ApiSB().dio.post('/rpc/get_top_10_assets_by_quantity');
     List<Asset> list = [];
     if (response != ''){
       try{
-        list = Asset.decodeTopThree(response.data);
+        list = Asset.decodeTopTen(response.data);
       }catch(e){
         print('error $e');
       }

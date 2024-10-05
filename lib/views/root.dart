@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:varsity_app/views/portfolio.dart';
+import 'package:varsity_app/views/leaderboard.dart';
 import 'landing.dart';
 
 class RootScreen extends StatefulWidget {
-  final int? tab;
-
-  RootScreen({Key? key, this.tab}) : super(key: key);
+  RootScreen({Key? key}) : super(key: key);
 
   @override
   State<RootScreen> createState() => _RootScreenState();
 }
 
 class _RootScreenState extends State<RootScreen> {
-  int selectedTab = 0;
+  int selectedTab = 1;
   // List<Stocks> stonks = [];
 
   @override
   void initState() {
-    if (widget.tab != null) selectedTab = widget.tab!;
+    // if (widget.tab != null) selectedTab = widget.tab!;
     super.initState();
   }
 
@@ -26,15 +25,15 @@ class _RootScreenState extends State<RootScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
-      // WatchlistScreen(),
+      LeaderBoardScreen(),
       LandingScreen(),
       UserAssetsScreen(),
     ];
 
     final rootTab = <BottomNavigationBarItem>[
+      BottomNavigationBarItem(icon: Icon(Icons.bar_chart), activeIcon: Icon(Icons.bar_chart, color: selectedColor()), label: 'Watchlist'),
       BottomNavigationBarItem(icon: Icon(Icons.home_filled),activeIcon: Icon(Icons.home_filled, color: selectedColor()), label: 'Home'),
       BottomNavigationBarItem(icon: Icon(Icons.pie_chart),activeIcon: Icon(Icons.pie_chart, color: selectedColor()), label: 'Portfolio'),
-      // BottomNavigationBarItem(icon: Icon(Icons.bar_chart), activeIcon: Icon(Icons.bar_chart, color: selectedColor()), label: 'Watchlist'),
     ];
 
     // if (!widget.tablet) toastSuccess('No Tablet detected, using mobile view!');
