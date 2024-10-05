@@ -68,7 +68,6 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> with SingleTicker
 
     return widgets;
   }
-
   Widget podium(List<Asset> assets){
     if (assets.length < 3) assets = [Asset(), Asset(), Asset()];
     return
@@ -78,24 +77,24 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> with SingleTicker
         firstPosition:
         Column(children: [
           Text('1st (${assets[0].quantity})',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp)),
-          Text(assets[0].name, textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey)),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18.sp)),
+          Text(assets[0].name, textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey),maxLines: 2),
         ]),
         firstRankingText: assets[0].symbol.toString(),
         secondPosition:
         Column(children: [
           Text('2nd (${assets[1].quantity})',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15.sp)),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14.sp)),
           Text(assets[1].name,textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey)),
         ]),
         secondRankingText: assets[1].symbol.toString(),
         thirdPosition:
         Column(children: [
           Text('3rd (${assets[2].quantity})',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15.sp)),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14.sp)),
           Text(assets[2].name, textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey)),
         ]),
-        thirdRankingText: assets[2].symbol.toString(),
+        thirdRankingText: (assets[2].symbol.length < 3)? assets[2].symbol : assets[2].symbol.substring(0,3) ,
       );
       // Padding(
       //   padding: EdgeInsets.symmetric( horizontal: 5.w),
@@ -121,11 +120,11 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> with SingleTicker
         BlocBuilder<PortfolioBloc, PortfolioState>(builder: (context, state) {
           if (state.status.isSuccess) {
             return Column(children: [
-              Text('Top 10 User\'s Favourite Stocks', style: TextStyle(color: Colors.white, fontSize: 17.sp)),
+              Text('Top 10 Users\' Favourite Stocks', style: TextStyle(color: Colors.white, fontSize: 16.sp)),
               podium(state.transactions),
               SizedBox(height: 2.h,),
               if (state.transactions.length > 3)
-                Container(height: 32.h, child: ListView(children: _renderLeaderboardItems(state.transactions)))
+                Container(height: 30.h, child: ListView(children: _renderLeaderboardItems(state.transactions)))
             ]);
           }
           else return const Center(child: CircularProgressIndicator());
