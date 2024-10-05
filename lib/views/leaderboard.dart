@@ -70,6 +70,7 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> with SingleTicker
   }
 
   Widget podium(List<Asset> assets){
+    if (assets.length < 3) assets = [Asset(), Asset(), Asset()];
     return
       // Column(children: [
       Podium(
@@ -90,7 +91,7 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> with SingleTicker
         secondRankingText: assets[1].symbol.toString(),
         thirdPosition:
         Column(children: [
-          Text('3rd (${assets[0].quantity})',
+          Text('3rd (${assets[2].quantity})',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15.sp)),
           Text(assets[2].name, textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey)),
         ]),

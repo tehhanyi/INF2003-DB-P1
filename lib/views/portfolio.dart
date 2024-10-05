@@ -38,6 +38,12 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
     if (widgets.isNotEmpty) {
       widgets.removeLast();
     }
+    if (portfolio.isEmpty)
+      widgets.add(Center(
+          child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 5.w),
+              child: Text('There seems to have no transactions yet, start paper trading now at home page!', textAlign: TextAlign.center  ,style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp)))));
+    else
     widgets.add(Center(
         child: Padding(
             padding: const EdgeInsets.only(bottom: 0),
@@ -62,13 +68,13 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(asset.name, style: TextStyle(),maxLines: 1),
-                      Text('Bought at \$${asset.boughtPrice}',style: TextStyle(color:Colors.blueGrey),)// style: TextStyle(color: Colors.grey)
+                      Text('Bought at \$${asset.boughtPrice.toStringAsFixed(2)}',style: TextStyle(color:Colors.blueGrey),)// style: TextStyle(color: Colors.grey)
                     ],
                   )),
               Container(width: 20.w, child: Text(asset.quantity.toString())),
               Container(
                   width: 15.w,
-                  child: Text('\$${asset.quantity * asset.boughtPrice}'.toString())),
+                  child: Text('\$${(asset.quantity * asset.boughtPrice).toStringAsFixed(2)}'.toString())),
               // Container(
               //     width: 37.w,
               //     height: 5.h,
@@ -101,7 +107,7 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
       child: Column(
         children: [
           Image.asset('assets/images/user.png', height: 12.h, fit: BoxFit.fitHeight, color: Colors.white,),
-          Row(
+      FittedBox(fit: BoxFit.fitWidth,child:Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Hi, ', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20.sp)),
@@ -139,7 +145,7 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
                     });
               }, icon: Icon(Icons.edit))
             ],
-          ),
+          )),
         ],
       ),
     );
@@ -151,7 +157,7 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
         Text('Profit / Loss'),
         BlocBuilder<PLBloc, PLState>(builder: (context, state){
           if(state.status.isSuccess)
-            return Text('${(state.price > 0) ? '+' : '-'}\$${state.price.toString().replaceAll(RegExp('-'), '')}',
+            return Text('${(state.price > 0) ? '+' : (state.price == 0) ? '':'-'}\$${state.price.toString().replaceAll(RegExp('-'), '')}',
               style: TextStyle(fontWeight: FontWeight.bold, color: (state.price > 0) ? Colors.green : Colors.red, fontSize: 24.sp));
           else return const Center(child: CircularProgressIndicator());
 

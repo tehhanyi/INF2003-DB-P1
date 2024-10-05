@@ -8,10 +8,10 @@ class Asset {
   final num profit;
 
   Asset({
-    required this.name,
-    required this.symbol,
-    required this.boughtPrice,
-    required this.quantity,
+    this.name ='',
+    this.symbol = '',
+    this.boughtPrice = 0,
+    this.quantity = 0,
     this.profit = 0
   });
 
