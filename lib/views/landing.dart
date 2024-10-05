@@ -16,7 +16,7 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
-  String desc = 'Papar Trades stands at the intersection of technology, education, and finance, offering a unique solution to the modern trades\'s dilemma. By combining a user-friendly interface with powerful technological underpinnings and educational elements, it promises to transform the way individuals engage with the stock market. Whether you\'re a seasoned trader or just starting, Paper Trades is your gateway to mastering the art of trading, one swipe at a time.';
+  String desc = 'Paper Trades stands at the intersection of technology, education, and finance, offering a unique solution to the modern trades\'s dilemma. By combining a user-friendly interface with powerful technological underpinnings and educational elements, it promises to transform the way individuals engage with the stock market. Whether you\'re a seasoned trader or just starting, Paper Trades is your gateway to mastering the art of trading, one swipe at a time.';
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   Widget About(){
     return Column(
