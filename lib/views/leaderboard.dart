@@ -69,8 +69,11 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> with SingleTicker
     return widgets;
   }
   Widget podium(List<Asset> assets){
-    if (assets.length < 3) assets = [Asset(), Asset(), Asset()];
-    return
+    if (assets.length < 3)
+      for (int i = 0; assets.length < 3; i++)
+        assets.add(Asset());
+
+      return
       // Column(children: [
       Podium(
         color: Colors.greenAccent,
