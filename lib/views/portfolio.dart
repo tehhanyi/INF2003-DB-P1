@@ -213,18 +213,18 @@ class _UserAssetsScreenState extends State<UserAssetsScreen> {
                   child: ListView(children: _renderTransactionItems(state.transactions)),
                 );
               }
-              else if(state.status.isLoading || state.status.isTransactionLoading){
+              else// if(state.status.isLoading || state.status.isTransactionLoading){
                 return const Center(child: CircularProgressIndicator());
-              } else {
-                // return RefreshIndicator(
-                    // onRefresh: {{_pullRefresh,
-                    // child:
-                    return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: SizedBox(
-                            child: Text('There seem to be an error, please try again.',),
-                            height: 60.h));
-              }
+              // else {
+              //   // return RefreshIndicator(
+              //       // onRefresh: {{_pullRefresh,
+              //       // child:
+              //       return SingleChildScrollView(
+              //           physics: const AlwaysScrollableScrollPhysics(),
+              //           child: SizedBox(
+              //               child: Text('There seem to be an error, please try again.',),
+              //               height: 60.h));
+              // }
             })
             // Asset('Apple Inc.', 3 , '\$172.28 USD', [172.28, 176.04, 171.03, 172.28]),
             // Asset('BlackRock Inc', 1 , '\$824.83 USD', [804.68, 834.79, 834.47,824.83]),

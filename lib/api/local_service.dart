@@ -67,8 +67,8 @@ class LocalService {
     print('findorcreateUser ${response.data}');
     String? userId = response.data[0]['user_id'].toString();
     String? name = response.data[0]['name'].toString();
-    sharedPreferences.setString('user_id', userId ?? '');
-    sharedPreferences.setString('name', name ?? '');
+    sharedPreferences.setString('user_id', userId);
+    sharedPreferences.setString('name', name);
     return userId;
   }
 
@@ -83,7 +83,7 @@ class LocalService {
     var response = await ApiSB().dio.patch('/User?user_id=eq.$userId', data: jsonEncode({'name': name}));
     // var response = await ApiSB().dio.post('/rpc/update_username', data: jsonEncode({'p_user_id': userId, 'new_username': name}));
     if (response != ''){
-      sharedPreferences.setString('name', name ?? '');
+      sharedPreferences.setString('name', name);
       return response.data[0]['name'];
     } else return null;
   }
@@ -133,24 +133,21 @@ class LocalService {
   }
 
   Future<num> getProfitLoss(List<Asset> assets) async{
-    assets = assets.toSet().toList();
-    for (var stock in assets){
-      var realTimeStock = await getMarketInfo(stock.symbol);
+    List<String> assetSymbols = assets.map((asset) => asset.symbol).toList().toSet().toList();
+    for (var symbol in assetSymbols){
+      var realTimeStock = await getMarketInfo(symbol);
       if (realTimeStock != null)
-        await ApiSB().dio.patch('/Asset?symbol=eq.${stock.symbol}',
+        await ApiSB().dio.patch('/Asset?symbol=eq.${symbol}',
             data: jsonEncode({'current_price': realTimeStock.openPrice}));
-      print('updated ${stock.symbol}');
+      print('updated ${symbol}');
     }
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
     var response = await ApiSB().dio.post('/rpc/get_user_profit_loss', data: jsonEncode({'p_user_id': userId}));
     List<Asset> list = [];
-    // String profitLoss = response.data[0]['profit_loss'].toString();
-
     if (response != ''){
       print('getProfitLoss $response');
       try{
-        // print(response.runtimeType);
         list = Asset.decodePL(response.data);
       }catch(e){
         print('error $e');
