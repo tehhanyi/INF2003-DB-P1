@@ -87,7 +87,7 @@ class MongoDB {
     try {
       DbCollection collection = db!.collection(collectionName);
       var result = await collection.update(search, data);
-      print(result.isNotEmpty ? "Inserted Successfully" : "Insert Failed");
+      print(result.isNotEmpty ? "Updated Successfully" : "Update Failed");
     } catch (e) {
       throwError('Error update data: $e');
     }
