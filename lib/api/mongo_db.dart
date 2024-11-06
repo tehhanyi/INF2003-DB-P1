@@ -72,14 +72,24 @@ class MongoDB {
     return null;
   }
 
-  Future<String> insert(String collectionName, dynamic data) async {
+  Future<void> insert(String collectionName, dynamic data) async {
     try {
       DbCollection collection = db!.collection(collectionName);
       var result = await collection.insertOne(data);
-      return result.isSuccess ? "Inserted Successfully" : "Insert Failed";
+      print(result.isSuccess ? "Inserted Successfully" : "Insert Failed");
     } catch (e) {
       throwError('Error insert data: $e');
-      return 'Failed to insert data: ${e.toString()}';
+      // return 'Failed to insert data: ${e.toString()}';
+    }
+  }
+
+  Future<void> update(String collectionName,dynamic search, dynamic data) async {
+    try {
+      DbCollection collection = db!.collection(collectionName);
+      var result = await collection.update(search, data);
+      print(result.isNotEmpty ? "Inserted Successfully" : "Insert Failed");
+    } catch (e) {
+      throwError('Error update data: $e');
     }
   }
 }

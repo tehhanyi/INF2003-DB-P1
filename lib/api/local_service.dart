@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:core';
-import 'dart:ffi';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,20 +63,17 @@ class LocalService {
 
   Future<String?> loginUser(String phone) async {
     var sharedPreferences = await SharedPreferences.getInstance();
-    // var response = await ApiSB().dio.post('/User', data: jsonEncode({'phone_number': phone}));
     // var response = await ApiSB().dio.post('/rpc/find_or_create_user', data: jsonEncode({'p_phone_number': phone}));
-
     Map<String, dynamic> searchMap = {'phone_number':int.parse(phone)};
 
     String? userId;
     String? name;
     try {
-      //check if user exist:
-      Map<String, dynamic>? checkUser = await MongoDB().view('User', searchMap);
+      Map<String, dynamic>? checkUser = await MongoDB().view('User', searchMap); //check if user exist
       if (checkUser == null) {
         await MongoDB().insert('User', searchMap);
       }
-      Map<String, dynamic>? user = await MongoDB().view('User', searchMap);
+      Map<String, dynamic>? user = await MongoDB().view('User', searchMap);  //TODO: to fix, user_id needs to be auto-generated and name by default should be 'Default Name'
       print('user ${user.toString()}');
       userId = user!['user_id'].toString();
       name = user['name'].toString();
@@ -99,12 +95,14 @@ class LocalService {
   Future<String?> updateName(String name) async {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
-    var response = await ApiSB().dio.patch('/User?user_id=eq.$userId', data: jsonEncode({'name': name}));
-    // var response = await ApiSB().dio.post('/rpc/update_username', data: jsonEncode({'p_user_id': userId, 'new_username': name}));
-    if (response != ''){
+    // var response = await ApiSB().dio.patch('/User?user_id=eq.$userId', data: jsonEncode({'name': name}));
+    try{
+      await MongoDB().update('User', {'user_id':userId}, {'name': name});
       sharedPreferences.setString('name', name);
-      return response.data[0]['name'];
-    } else return null;
+      return name;
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<bool> deleteUser() async {
