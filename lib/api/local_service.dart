@@ -109,12 +109,15 @@ class LocalService {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
 
-    var response = await ApiSB().dio.delete('/User?user_id=eq.$userId');
-    if (response != ''){
+    // var response = await ApiSB().dio.delete('/User?user_id=eq.$userId');
+    try{
+      await MongoDB().delete('User', {'user_id':userId});
       print('user_id $userId successfully deleted');
       sharedPreferences.clear();
       return true;
-    } else return false;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<List<Asset>> getAllTransaction() async {

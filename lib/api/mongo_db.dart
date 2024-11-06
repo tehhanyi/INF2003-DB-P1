@@ -92,4 +92,14 @@ class MongoDB {
       throwError('Error update data: $e');
     }
   }
+
+  Future<void> delete(String collectionName ,dynamic search) async {
+    try {
+      DbCollection collection = db!.collection(collectionName);
+      var result = await collection.deleteOne(search);
+      print(result.isSuccess ? "Deleted Successfully" : "Delete Failed");
+    } catch (e) {
+      throwError('Error delete data: $e');
+    }
+  }
 }
