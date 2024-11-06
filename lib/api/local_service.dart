@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:ffi';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:varsity_app/api/mongo_db.dart';
 import 'package:varsity_app/api/secret.dart';
 import 'package:varsity_app/models/assets.dart';
 
@@ -60,15 +62,32 @@ class LocalService {
     return userId;
   }
 
-  Future<String?> createUser(String phone) async {
+  Future<String?> loginUser(String phone) async {
     var sharedPreferences = await SharedPreferences.getInstance();
     // var response = await ApiSB().dio.post('/User', data: jsonEncode({'phone_number': phone}));
-    var response = await ApiSB().dio.post('/rpc/find_or_create_user', data: jsonEncode({'p_phone_number': phone}));
-    print('findorcreateUser ${response.data}');
-    String? userId = response.data[0]['user_id'].toString();
-    String? name = response.data[0]['name'].toString();
-    sharedPreferences.setString('user_id', userId);
-    sharedPreferences.setString('name', name);
+    // var response = await ApiSB().dio.post('/rpc/find_or_create_user', data: jsonEncode({'p_phone_number': phone}));
+
+    Map<String, dynamic> searchMap = {'phone_number':int.parse(phone)};
+
+    String? userId;
+    String? name;
+    try {
+      //check if user exist:
+      Map<String, dynamic>? checkUser = await MongoDB().view('User', searchMap);
+      if (checkUser == null) {
+        await MongoDB().insert('User', searchMap);
+      }
+      Map<String, dynamic>? user = await MongoDB().view('User', searchMap);
+      print('user ${user.toString()}');
+      userId = user!['user_id'].toString();
+      name = user['name'].toString();
+    } catch(e){
+      print(e);
+    }
+    if (userId != null && name != null) {
+      sharedPreferences.setString('user_id', userId);
+      sharedPreferences.setString('name', name);
+    }
     return userId;
   }
 

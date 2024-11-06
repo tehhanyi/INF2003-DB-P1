@@ -5,33 +5,24 @@ import '../constant.dart';
 
 class MongoDB {
   static Db? db;
-  static DbCollection? userCollection;
 
-  // static late var userCollection;
+  MongoDB() {
+    if (db == null || !db!.isConnected) {
+      connect();
+    }
+  }
 
   static Future<void> connect() async {
-
     try {
       db = await Db.create(MONGO_CONN_URL);
       await db!.open(); // Use db! to assert that db is not null
       inspect(db);
-
       // Check server status
       var status = await db!.serverStatus();
       print("Server Status --> $status");
-
-      // Initialize the user collection
-      userCollection = db!.collection('users');
-      print('Connected to MongoDB and userCollection initialized');
-
-      // Fetch initial data from the collection
-      var findStudent = await userCollection!.find().toList();
-      print('Documents in collection: ${findStudent.toString()}');
-
     } catch (e) {
       // Log the error
       print('Error connecting to MongoDB: $e');
-
       // Close the database if it was opened
       if (db != null && db!.isConnected) {
         await db!.close();
@@ -39,28 +30,56 @@ class MongoDB {
     }
   }
 
-  // Insert data into MongoDB
-  static Future<String> insert(dynamic data) async {
-    if (db == null || !db!.isConnected) {
-      return 'Database is not connected';
-    }
-    if (userCollection == null) {
-      return 'User collection is not initialized. Ensure connect() is called.';
-    }
-    try {
-      var result = await userCollection!.insertOne(data.toJson());
-      return result.isSuccess ? "Inserted Successfully" : "Insert Failed";
-    } catch (e) {
-      log("Error When Inserting Data: $e");
-      return 'Failed to insert data: ${e.toString()}';
-    }
-  }
-
-  // Optional: Method to close the connection
   static Future<void> close() async {
     if (db != null && db!.isConnected) {
       await db!.close();
       print('Database connection closed');
+    }
+  }
+
+  Future<void> throwError(String e) async {
+    // Close the database if it was opened
+    // close();
+    // Log the error
+    throw ('$e');
+  }
+
+  Future<List<Map<String, dynamic>>?> viewAll(String collectionName) async {
+    try {
+      // Initialize the user collection
+      DbCollection collection = db!.collection(collectionName);
+      // Fetch initial data from the collection
+      var dataList = await collection.find().toList();
+      print('data in $collectionName: ${dataList.toString()}');
+      return dataList;
+    } catch (e) {
+      throwError('Error viewAll: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> view(String collectionName, dynamic search) async {
+    try {
+      // Initialize the user collection
+      DbCollection collection = db!.collection(collectionName);
+      // Fetch initial data from the collection
+      var data = await collection.find(search).toList();
+      print('Find $search in $collectionName: $data');
+      if (data.isNotEmpty) return data[0];
+    } catch (e) {
+      throwError('$e');
+    }
+    return null;
+  }
+
+  Future<String> insert(String collectionName, dynamic data) async {
+    try {
+      DbCollection collection = db!.collection(collectionName);
+      var result = await collection.insertOne(data);
+      return result.isSuccess ? "Inserted Successfully" : "Insert Failed";
+    } catch (e) {
+      throwError('Error insert data: $e');
+      return 'Failed to insert data: ${e.toString()}';
     }
   }
 }

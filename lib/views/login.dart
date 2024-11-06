@@ -67,7 +67,7 @@ class LoginPageState extends State<LoginPage> {
                             if (loginController.text.length == 8) {
                               try {
                                 print(loginController.text);
-                                String? userId = await LocalService().createUser(loginController.text);
+                                String? userId = await LocalService().loginUser(loginController.text);
                                 if (userId != null) await Navigator.push(context, MaterialPageRoute(builder: (context) => RootScreen()));
                                 else throw "user_id null, please try again";
                                 // AuthenticationProvider.of(context).phoneSignIn(loginController.text, _onCodeSent, context);
