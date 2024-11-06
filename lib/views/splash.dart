@@ -4,6 +4,8 @@ import 'package:varsity_app/api/local_service.dart';
 import 'package:varsity_app/views/login.dart';
 import 'package:varsity_app/views/root.dart';
 
+import '../api/mongo_db.dart';
+
 class SplashScreen extends StatefulWidget {
 
   @override
@@ -25,6 +27,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           await Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage())); //RootScreen(tab: 1)
       });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      _async();
+    });
+  }
+
+  _async() async{
+    try {
+      // Attempt to connect to MongoDB
+      await MongoDB.connect();
+      print('MongoDB connected successfully');
+    } catch (e) {
+      print('Error connecting to MongoDB: $e');
+    }
   }
 
   @override
