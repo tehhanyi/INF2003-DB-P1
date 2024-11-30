@@ -3,12 +3,13 @@ import 'dart:core';
 
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:varsity_app/api/mongo_db.dart';
 import 'package:varsity_app/api/secret.dart';
+import 'package:varsity_app/constant.dart';
 import 'package:varsity_app/models/assets.dart';
 
 import '../models/stocks.dart';
 import 'api_FH.dart';
+import 'api_NodeJS.dart';
 import 'api_SB.dart';
 
 class LocalService {
@@ -53,7 +54,7 @@ class LocalService {
   Future<String?> getExistingUser() async {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
-    print ('userId $userId');
+    print ('current existing userId $userId');
     // if (userId != null){
     //   var response = await ApiSB().dio.get('/User', data: jsonEncode({'phone_number': phone}));
     //
@@ -61,29 +62,15 @@ class LocalService {
     return userId;
   }
 
-  Future<String?> loginUser(String phone) async {
+  Future<String?> createUser(String phone) async {
     var sharedPreferences = await SharedPreferences.getInstance();
-    // var response = await ApiSB().dio.post('/rpc/find_or_create_user', data: jsonEncode({'p_phone_number': phone}));
-    Map<String, dynamic> searchMap = {'phone_number':int.parse(phone)};
-
-    String? userId;
-    String? name;
-    try {
-      Map<String, dynamic>? checkUser = await MongoDB().view('User', searchMap); //check if user exist
-      if (checkUser == null) {
-        await MongoDB().insert('User', searchMap);
-      }
-      Map<String, dynamic>? user = await MongoDB().view('User', searchMap);  //TODO: to fix, user_id needs to be auto-generated and name by default should be 'Default Name'
-      print('user ${user.toString()}');
-      userId = user!['user_id'].toString();
-      name = user['name'].toString();
-    } catch(e){
-      print(e);
-    }
-    if (userId != null && name != null) {
-      sharedPreferences.setString('user_id', userId);
-      sharedPreferences.setString('name', name);
-    }
+    // var response = await ApiSB().dio.post('/User', data: jsonEncode({'phone_number': phone}));
+    var response = await ApiSB().dio.post('/rpc/find_or_create_user', data: jsonEncode({'p_phone_number': phone}));
+    print('findorcreateUser ${response.data}');
+    String? userId = response.data[0]['user_id'].toString();
+    String? name = response.data[0]['name'].toString();
+    sharedPreferences.setString('user_id', userId);
+    sharedPreferences.setString('name', name);
     return userId;
   }
 
@@ -95,44 +82,40 @@ class LocalService {
   Future<String?> updateName(String name) async {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
-    // var response = await ApiSB().dio.patch('/User?user_id=eq.$userId', data: jsonEncode({'name': name}));
-    try{
-      await MongoDB().update('User', {'user_id':userId}, {'name': name});
+    var response = await ApiSB().dio.patch('/User?user_id=eq.$userId', data: jsonEncode({'name': name}));
+    // var response = await ApiSB().dio.post('/rpc/update_username', data: jsonEncode({'p_user_id': userId, 'new_username': name}));
+    if (response != ''){
       sharedPreferences.setString('name', name);
-      return name;
-    } catch (e) {
-      return null;
-    }
+      return response.data[0]['name'];
+    } else return null;
   }
 
   Future<bool> deleteUser() async {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
 
-    // var response = await ApiSB().dio.delete('/User?user_id=eq.$userId');
-    try{
-      await MongoDB().delete('User', {'user_id':userId});
+    var response = await ApiSB().dio.delete('/User?user_id=eq.$userId');
+    if (response != ''){
       print('user_id $userId successfully deleted');
       sharedPreferences.clear();
       return true;
-    } catch (e) {
-      return false;
-    }
+    } else return false;
   }
 
   Future<List<Asset>> getAllTransaction() async {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
-    var response = await ApiSB().dio.get('/rpc/get_user_portfolio?user_id_param=$userId'); //18
     List<Asset> list = [];
-    if (response != ''){
-      print('getAllTransaction $response');
-      try{
-      // print(response.runtimeType);
-      list = Asset.decode(response.data);
-      }catch(e){
-        print('error $e');
+    try{
+      print('$nodeJSUrl/api/getUserPortfolio?userId=$userId');
+      var response = await ApiNode().dio.get('/api/getUserPortfolio?userId=$userId'); //18
+      if (response != '') {
+        Map responseBody = response.data;
+        print('get all transaction from user_id $userId: $response');
+        list = Asset.decode(responseBody['portfolio']);
       }
+    }catch(e){
+      print('error $e');
     }
     return list;
   }
@@ -141,53 +124,45 @@ class LocalService {
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
     var data = jsonEncode({
-      'user_id': userId,
-      "asset_name": asset.name,
+      'userId': userId,
+      "assetName": asset.name,
       "symbol": asset.symbol,
-      "bought_price": asset.boughtPrice,
+      "boughtPrice": asset.boughtPrice,
       "quantity": asset.quantity
     });
     try{
-      var response = await ApiSB().dio.post('/rpc/add_transaction_with_asset', data: data);
-      print('createTransaction $response');
-      } catch(e){
+      print('$nodeJSUrl/api/addTransactionWithAsset\n$data');
+
+      var response = await ApiNode().dio.post('/api/addTransactionWithAsset', data: data);
+      if (response != '') {
+        print('${response.data['message']}');
+      }} catch(e){
         print('error $e');
+        return false;
       }
     return true;
   }
 
   Future<num> getProfitLoss(List<Asset> assets) async{
-    List<String> assetSymbols = assets.map((asset) => asset.symbol).toList().toSet().toList();
-    for (var symbol in assetSymbols){
-      var realTimeStock = await getMarketInfo(symbol);
-      if (realTimeStock != null)
-        await ApiSB().dio.patch('/Asset?symbol=eq.${symbol}',
-            data: jsonEncode({'current_price': realTimeStock.openPrice}));
-      print('updated ${symbol}');
-    }
+
     var sharedPreferences = await SharedPreferences.getInstance();
     String? userId = sharedPreferences.getString('user_id');
-    var response = await ApiSB().dio.post('/rpc/get_user_profit_loss', data: jsonEncode({'p_user_id': userId}));
-    List<Asset> list = [];
-    if (response != ''){
-      print('getProfitLoss $response');
-      try{
-        list = Asset.decodePL(response.data);
-      }catch(e){
-        print('error $e');
+
+    try{
+      print('GET $nodeJSUrl/api/getUserProfitLoss?userId=$userId');
+      var response = await ApiNode().dio.get('/api/getUserProfitLoss?userId=$userId'); //18
+      if (response != '') {
+        Map responseBody = response.data;
+        return (responseBody['Profit'] * 100).truncateToDouble() / 100;
       }
+    }catch(e){
+      print('error $e');
     }
-    num totalPL = 0;
-    for (var asset in list){
-      totalPL += asset.profit;
-    }
-    return (totalPL * 100).truncateToDouble() / 100;
-
-
+    return 0;
   }
 
   Future<List<Asset>> getTopTen() async{
-    var response = await ApiSB().dio.post('/rpc/get_top_10_assets_by_quantity');
+    var response = await ApiNode().dio.get('/api/top10assets');
     List<Asset> list = [];
     if (response != ''){
       try{
@@ -195,30 +170,6 @@ class LocalService {
       }catch(e){
         print('error $e');
       }
-    }
-    return list;
-  }
-
-  Future<bool> addWatchlist(Stocks stock) async {
-    var sharedPreferences = await SharedPreferences.getInstance();
-    List<Stocks> list = await getAllWatchlist();
-    list.add(stock);
-    sharedPreferences.setString('watchlist', Stocks.encode(list));
-    return true;
-  }
-
-  Future<bool> updateWatchlist(List<Stocks> stocks) async {
-    var sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('watchlist', Stocks.encode(stocks));
-    return true;
-  }
-
-  Future<List<Stocks>> getAllWatchlist() async {
-    var sharedPreferences = await SharedPreferences.getInstance();
-    final String? response =  sharedPreferences.getString('watchlist');
-    List<Stocks> list = [];
-    if (response != '' && response != null){
-      list = Stocks.decode(response);
     }
     return list;
   }
